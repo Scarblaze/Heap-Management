@@ -11,11 +11,11 @@ char memory[16416];
 typedef struct meta_block
 {
     size_t size;
-    int isFree;
+    int isFree; //1 for free 0 for not free
     struct meta_block *next;
 } meta_block;
 
-meta_block *store[13];
+meta_block *store[13]; //the array of linked lists each index representing the 2^i size
 
 void Initialize()
 {
@@ -25,7 +25,7 @@ void Initialize()
     temp->next = NULL;
     store[0] = temp;
 
-    int add = 2;
+    int add = 2; //for multiples of 2
     for (int i = 1; i < 13; i++)
     {
         temp = (meta_block *)((char *)store[i - 1] + add + sizeof(meta_block));
@@ -67,12 +67,15 @@ void *Alloc(int bytes) {
 
     while (!done && index < 13) {
         // Check if store[index] exists before dereferencing
+        //allocate at first only if it is free
         if (store[index] && store[index]->isFree == 1 && store[index]->next == NULL) {
             store[index]->isFree = 0;
             store[index]->size = bytes;
             retVal = store[index];
             done = 1;
         } 
+
+        //if first already allocated but its size is large enough to fit the request
         else if (store[index] && store[index]->isFree == 1 && store[index]->size >= bytes) {
             store[index]->isFree = 0;
             store[index]->size = bytes;
@@ -82,7 +85,7 @@ void *Alloc(int bytes) {
         else if (store[index] && (store[index]->size + bytes) < pow(2, index + 1)) {
             meta_block *t = store[index];
             int space = t->size + sizeof(meta_block);
-            while (t->next != NULL && !done) {
+            while (t->next != NULL && !done) { //traverse the list to find a correct block to allocate
                 if (t->isFree && t->size >= bytes) {
                     t->size = bytes;
                     t->isFree = 0;
@@ -93,6 +96,7 @@ void *Alloc(int bytes) {
                 space += t ? (t->size + sizeof(meta_block)) : 0;
             }
 
+            //if space is availabe allocate at the end
             if (!done && (space + bytes + sizeof(meta_block)) < pow(2, index + 1)) {
                 meta_block *temp = (meta_block *)((char *)t + t->size + sizeof(meta_block));
                 temp->size = bytes;
@@ -116,7 +120,7 @@ void *Alloc(int bytes) {
     return (void *)retVal;
 }
 
-int mergeindex(void *ptr)
+int mergeindex(void *ptr) //used to find correct power of 2 index according to the request
 {
     int index = 0;
     int found = 0;
@@ -142,7 +146,7 @@ void Merge(int index)
         store[index]->size += store[index]->next->size;
         store[index]->next = store[index]->next->next;
     }
-
+    //merge consecutive free blocks
     meta_block *ptr = store[index] ? store[index]->next : NULL;
 
     while (ptr != NULL)

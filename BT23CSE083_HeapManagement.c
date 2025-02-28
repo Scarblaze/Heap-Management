@@ -6,7 +6,7 @@
 #include <math.h>
 
 #define MAX_SIZE 8392
-char memory[16416];
+char memory[16416]; //the main pool where everything is essentially allocated
 
 typedef struct meta_block
 {
@@ -19,7 +19,7 @@ meta_block *store[13]; //the array of linked lists each index representing the 2
 
 void Initialize()
 {
-    meta_block *temp = (void *)memory;
+    meta_block *temp = (void *)memory; //memory is an array of char (bytes), but we treat it as structured memory. temp now points to the first byte of memory but treats it as a meta_block.
     temp->size = 0;
     temp->isFree = 1;
     temp->next = NULL;
@@ -169,7 +169,7 @@ void Free(void* ptr)
     {
         meta_block *temp = (meta_block *)ptr;
         temp->isFree = 1;
-        printf("Deallocated successfully\n");
+        printf("Deallocated successfully\n"); //i do not remove it. it's just availabe for reuse
 
         int index = mergeindex(ptr);
         Merge(index);
@@ -184,12 +184,12 @@ int main() {
     Initialize();
 
     printf("\n*-*-* MEMORY ALLOCATION *-*-*\n");
-    void* ptr1 = Alloc(2000);
-    void* ptr2 = Alloc(4000);
-    void* ptr3 = Alloc(2000);
+    void* ptr1 = Alloc(2000); //2^11=2048
+    void* ptr2 = Alloc(4000); //2^12=4096 allocated right after ptr1 in memory array
+    void* ptr3 = Alloc(2000); //added on the 11th linked list
 
     printf("\n*-*-* MEMORY DEALLOCATION *-*-*\n");
-    Free(ptr2);
+    Free(ptr2); //frees the 4000 block that is avaible for reuse
 
     printf("\n*-*-* MEMORY ALLOCATION AFTER FREE *-*-*\n");
     void* ptr4 = Alloc(3000);  // Should fit in freed block

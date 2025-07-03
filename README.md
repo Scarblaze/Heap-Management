@@ -17,27 +17,27 @@ A global array of linked lists (`store[13]`) maintains free/allocated blocks for
 
 ---
 
-# ⚙️ Functionality
+## ⚙️ Functionality
 
-## 🧷 Initialize()
+### 🧷 Initialize()
 Initializes the store[] array with base blocks of sizes 2^1 to 2^13.
 
-## 🔍 findrange(int k)
+### 🔍 findrange(int k)
 Determines the correct index in store[] corresponding to the size k.
 
-## 🧠 Alloc(int bytes)
+### 🧠 Alloc(int bytes)
 Allocates memory block of given size.
 
 Returns a pointer to the block.
 
 Uses linked list traversal to reuse or split space intelligently.
 
-## 🧼 Free(void* ptr)
+### 🧼 Free(void* ptr)
 Frees the given block.
 
 Marks it reusable and attempts to merge it with adjacent free buddies.
 
-## 🔗 Merge(int index)
+### 🔗 Merge(int index)
 Merges adjacent free blocks in store[index] to form larger blocks.
 
 
